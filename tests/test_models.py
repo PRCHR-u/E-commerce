@@ -57,6 +57,22 @@ class TestProduct:
         assert product.price == 0.0
         assert product.quantity == 0
 
+    def test_product_wrong_type_name(self):
+        with pytest.raises(TypeError):
+            Product(123, "Современный смартфон", 29999.99, 5)
+
+    def test_product_wrong_type_description(self):
+        with pytest.raises(TypeError):
+            Product("Смартфон", 123, 29999.99, 5)
+
+    def test_product_wrong_type_price(self):
+        with pytest.raises(TypeError):
+            Product("Смартфон", "Современный смартфон", "29999.99", 5)
+
+    def test_product_wrong_type_quantity(self):
+        with pytest.raises(TypeError):
+            Product("Смартфон", "Современный смартфон", 29999.99, "5")
+
 
 class TestCategory:
     """Тесты для класса Category"""
@@ -76,7 +92,7 @@ class TestCategory:
         products = [
             Product("Смартфон", "Современный смартфон", 29999.99, 5),
             Product("Планшет", "Планшет для работы", 19999.99, 3)
-        ]
+            ]
         category = Category("Электроника", "Все виды электроники", products)
 
         assert len(category.products) == 2
@@ -136,6 +152,41 @@ class TestCategory:
         assert len(category1.products) == 1
         assert len(category2.products) == 1
 
+    def test_category_add_product_already_in_category(self):
+        """Проверка добавления продукта, который уже есть в категории"""
+        category = Category("Электроника", "Все виды электроники")
+        product = Product("Смартфон", "Современный смартфон", 29999.99, 5)
+        category.add_product(product)
+        category.add_product(product)  # Пытаемся добавить тот же продукт еще раз
+        assert len(category.products) == 1
+        assert Category.total_products == 1
+
+    def test_category_remove_product_not_in_category(self):
+        """Проверка удаления продукта, которого нет в категории"""
+        category = Category("Электроника", "Все виды электроники")
+        product1 = Product("Смартфон", "Современный смартфон", 29999.99, 5)
+        product2 = Product("Планшет", "Планшет для работы", 19999.99, 3)
+        category.add_product(product1)
+        category.remove_product(product2)  # Пытаемся удалить продукт, которого нет
+        assert len(category.products) == 1
+        assert Category.total_products == 1
+        assert product1 in category.products
+        assert product2 not in category.products
+
+    def test_category_wrong_type_name(self):
+        with pytest.raises(TypeError):
+            Category(123, "Все виды электроники")
+
+    def test_category_wrong_type_description(self):
+        with pytest.raises(TypeError):
+            Category("Электроника", 123)
+
+    def test_category_wrong_type_products(self):
+        with pytest.raises(TypeError):
+            Category("Электроника", "Все виды электроники", products="not a list")
+
+
+
 
 def test_product_creation(product):
     assert product.name == "Test Product"
@@ -186,28 +237,3 @@ def test_multiple_categories():
     assert Category.total_products == 2     # Ожидаем, что всего 2 продукта
     assert len(category1.products) == 1     # В первой категории 1 продукт
     assert len(category2.products) == 1     # Во второй категории 1 продукт
-
-
-class Category:
-    total_categories = 0
-    total_products = 0
-
-    def __init__(self, name: str, description: str,
-                 products: List[Product] = None) -> None:
-        self.name = name
-        self.description = description
-        self.products = products if products is not None else []
-        Category.total_categories += 1
-        Category.total_products += len(self.products)
-
-    def add_product(self, product: Product) -> None:
-        """Добавляет продукт в категорию и увеличивает счетчик продуктов."""
-        if product not in self.products:
-            self.products.append(product)
-            Category.total_products += 1
-
-    def remove_product(self, product: Product) -> None:
-        """Удаляет продукт из категории и уменьшает счетчик продуктов."""
-        if product in self.products:
-            self.products.remove(product)
-            Category.total_products -= 1  # Уменьшаем счетчик продуктов

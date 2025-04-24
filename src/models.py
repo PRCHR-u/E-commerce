@@ -10,11 +10,23 @@ class Product:
     quantity: int
 
     def __init__(self, name: str, description: str,
-                 price: float, quantity: int) -> None:
+                 price: float, quantity: int) -> None:        
+        if not isinstance(name, str):
+            raise TypeError("Name must be a string")
+        if not isinstance(description, str):
+            raise TypeError("Description must be a string")
+        if not isinstance(price, (int, float)):
+            raise TypeError("Price must be a number")
+        if not isinstance(quantity, int):
+            raise TypeError("Quantity must be an integer")
+
         self.name = name
         self.description = description
         self.price = price
         self.quantity = quantity
+
+
+
 
         if self.price < 0:
             raise ValueError("Price cannot be negative")
@@ -28,6 +40,12 @@ class Category:
 
     def __init__(self, name: str, description: str,
                  products: List[Product] = None) -> None:
+        if not isinstance(name, str):
+            raise TypeError("Name must be a string")
+        if not isinstance(description, str):
+            raise TypeError("Description must be a string")
+        if products is not None and not isinstance(products, list):
+            raise TypeError("Products must be a list or None")
         self.name = name
         self.description = description
         self.products = products if products is not None else []
