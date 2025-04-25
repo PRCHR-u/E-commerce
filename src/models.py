@@ -16,8 +16,11 @@ class Product:
         self.quantity = quantity
         self.price = price
 
-    def __str__(self):
-        return f"{self.name}, {self._price} руб. Остаток: {self.quantity} шт."
+    def __add__(self, other):
+        """Сложение товаров."""
+        if not isinstance(other, Product):
+            raise TypeError('Unsupported operand type for +: Product and <class \'' + other.__class__.__name__ + '\'>')
+        return self.price * self.quantity + other.price * other.quantity
 
     @classmethod
     def new_product(cls, product_data):
@@ -41,6 +44,9 @@ class Product:
         else:
             self._price = value
 
+    def __str__(self):
+        return f"{self.name}, {self._price} руб. Остаток: {self.quantity} шт"
+
 
 class Category:
     total_categories = 0
@@ -58,6 +64,7 @@ class Category:
         self.description = description
         self._products: List[Product] = []
         if products:
+
             for product in products:
                 self.add_product(product)
 
@@ -79,3 +86,7 @@ class Category:
         for product in self._products:
             products_info += str(product) + "\n"
         return products_info
+
+    def __str__(self) -> str:
+        return f"{self.name}, количество продуктов: {Category.total_products} шт."
+

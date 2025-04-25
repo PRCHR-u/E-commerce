@@ -40,7 +40,6 @@ class TestProduct:
         assert product.price == 29999.99
         assert product.quantity == 5
 
-
     def test_product_negative_quantity(self):
         """Проверка валидации отрицательного количества"""
         with pytest.raises(ValueError, match="Quantity cannot be negative"):
@@ -52,8 +51,6 @@ class TestProduct:
         assert product.quantity == 0
         product.price = 0.0
         assert product.price == 10.0
-        
-
 
     def test_product_different_values(self):
         """Проверка инициализации объекта Product с разными значениями"""
@@ -78,7 +75,7 @@ class TestProduct:
     def test_product_wrong_type_quantity(self):
         with pytest.raises(TypeError):
             Product("Смартфон", "Современный смартфон", 29999.99, "5")
-    
+
     def test_new_product(self) -> None:
         """Проверяет корректность работы метода new_product"""
         product_data = {
@@ -105,6 +102,42 @@ class TestProduct:
         with pytest.raises(TypeError):
             product.price = "wrong type"
 
+    def test_product_str(self):
+        """Проверка строкового представления объекта Product"""
+        product = Product("Смартфон", "Современный смартфон", 29999.99, 5)
+        expected_str = "Смартфон, 29999.99 руб. Остаток: 5 шт"
+        assert str(product) == expected_str
+
+    def test_product_add(self):
+        """Проверяет корректность работы метода __add__"""
+        product1 = Product("Смартфон", "Современный смартфон", 100, 10)
+        product2 = Product("Чехол", "Защитный чехол", 200, 2)
+        assert product1 + product2 == 1400
+
+    def test_product_add_wrong_type(self):
+        """Проверяет корректность работы метода __add__ with wrong type"""
+        product1 = Product(
+            "Product 1",
+            "Test Description",
+            100.0,
+            10,
+        )
+        product2 = Product(
+            name="Product 2",
+            description="Test Description",
+            price=200.0,
+            quantity=2,
+        )
+        product3 = Product(
+            name="Product 3",
+            description="Test Description",
+            price=100.0,
+            quantity=0,
+        )
+        assert product1 + product3 == 1000, "Sum of product1 and product3 must be 1000"
+        with pytest.raises(TypeError, match="Unsupported operand type for \\+: Product and <class 'int'>") :
+            product1 + 10
+
 class TestCategory:
     """Тесты для класса Category"""
 
@@ -120,11 +153,11 @@ class TestCategory:
     def test_category_with_products(self):
         """Проверка инициализации категории с продуктами"""
         products = [
-            Product("Смартфон", "Современный смартфон", 29999.99, 5), 
+            Product("Смартфон", "Современный смартфон", 29999.99, 5),
             # Добавляем продукт 1
             Product("Планшет", "Планшет для работы", 19999.99, 3)
-            ]
-        category = Category("Электроника", "Все виды электроники", products)
+        ]
+        category = Category("Электроника", "Все виды электроники", products )
 
         assert len(category._products) == 2
         assert Category.total_products == 2
@@ -194,7 +227,6 @@ class TestCategory:
         assert category.products.count("\n") == 1
         assert Category.total_products == 1
 
-
     def test_category_remove_product_not_in_category(self):
         """Проверка удаления продукта, которого нет в категории"""
         category = Category("Электроника", "Все виды электроники")
@@ -205,6 +237,17 @@ class TestCategory:
         assert len(category._products) == 1
         assert Category.total_products == 1
         assert product2 not in category._products
+
+    def test_category_str(self):
+        """Проверка строкового представления объекта Category"""
+        category = Category("Электроника", "Все виды электроники")
+        expected_str = "Электроника, количество продуктов: 0 шт."
+        assert str(category) == expected_str
+
+        category = Category("Электроника", "Все виды электроники")
+        expected_str = "Электроника, количество продуктов: 0 шт."
+        assert str(category) == expected_str
+
 
     def test_category_wrong_type_name(self):
         with pytest.raises(TypeError):
@@ -269,3 +312,4 @@ def test_multiple_categories():
     assert Category.total_products == 2     # Ожидаем, что всего 2 продукта
     assert len(category1._products) == 1
     assert len(category2._products) == 1
+
