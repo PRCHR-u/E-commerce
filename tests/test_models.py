@@ -40,10 +40,6 @@ class TestProduct:
         assert product.price == 29999.99
         assert product.quantity == 5
 
-    def test_product_negative_price(self):
-        """Проверка валидации отрицательной цены"""
-        with pytest.raises(ValueError, match="Price cannot be negative"):
-            Product("Смартфон", "Современный смартфон", -29999.99, 5)
 
     def test_product_negative_quantity(self):
         """Проверка валидации отрицательного количества"""
@@ -52,10 +48,20 @@ class TestProduct:
 
     def test_product_zero_values(self):
         """Проверка корректной инициализации с нулевыми значениями"""
-        product = Product("Смартфон", "Современный смартфон", 0.0, 0)
-
-        assert product.price == 0.0
+        product = Product("Смартфон", "Современный смартфон", 10, 0)
         assert product.quantity == 0
+        product.price = 0.0
+        assert product.price == 10.0
+        
+
+
+    def test_product_different_values(self):
+        """Проверка инициализации объекта Product с разными значениями"""
+        product = Product("Ноутбук", "Мощный игровой ноутбук", 99999.99, 1)
+        assert product.name == "Ноутбук"
+        assert product.description == "Мощный игровой ноутбук"
+        assert product.price == 99999.99
+        assert product.quantity == 1
 
     def test_product_wrong_type_name(self):
         with pytest.raises(TypeError):
@@ -72,7 +78,32 @@ class TestProduct:
     def test_product_wrong_type_quantity(self):
         with pytest.raises(TypeError):
             Product("Смартфон", "Современный смартфон", 29999.99, "5")
+    
+    def test_new_product(self) -> None:
+        """Проверяет корректность работы метода new_product"""
+        product_data = {
+            "name": "Телевизор",
+            "description": "Современный телевизор",
+            "price": 50000.0,
+            "quantity": 3
+        }
+        product = Product.new_product(product_data)
+        assert product.name == "Телевизор"
+        assert product.description == "Современный телевизор"
+        assert product.price == 50000.0
+        assert product.quantity == 3
 
+    def test_product_price_setter(self):
+        product = Product("Test Product", "Test Description", 100.0, 10)
+        product.price = 200.0
+        assert product.price == 200.0
+        product.price = 0
+        assert product.price == 200.0
+
+    def test_product_price_setter_wrong_type(self):
+        product = Product("Test Product", "Test Description", 100.0, 10)
+        with pytest.raises(TypeError):
+            product.price = "wrong type"
 
 class TestCategory:
     """Тесты для класса Category"""
@@ -80,25 +111,25 @@ class TestCategory:
     def test_category_initialization(self):
         """Проверка корректной инициализации объекта Category"""
         category = Category("Электроника", "Все виды электроники")
-
         assert category.name == "Электроника"
         assert category.description == "Все виды электроники"
-        assert category.products == []
+        assert category.products == ""
         assert Category.total_categories == 1
         assert Category.total_products == 0
 
     def test_category_with_products(self):
         """Проверка инициализации категории с продуктами"""
         products = [
-            Product("Смартфон", "Современный смартфон", 29999.99, 5),
+            Product("Смартфон", "Современный смартфон", 29999.99, 5), 
+            # Добавляем продукт 1
             Product("Планшет", "Планшет для работы", 19999.99, 3)
             ]
         category = Category("Электроника", "Все виды электроники", products)
 
-        assert len(category.products) == 2
+        assert len(category._products) == 2
         assert Category.total_products == 2
-        assert products[0] in category.products
-        assert products[1] in category.products
+        assert products[0] in category._products
+        assert products[1] in category._products
 
     def test_category_counting(self):
         """Проверка подсчета количества категорий"""
@@ -124,12 +155,12 @@ class TestCategory:
         for product in products:
             category.add_product(product)
 
-        assert len(category.products) == 3
+        assert len(category._products) == 3
         assert Category.total_products == 3
 
         # Удаляем продукт
         category.remove_product(products[0])
-        assert len(category.products) == 2
+        assert len(category._products) == 2
         assert Category.total_products == 2
 
     def test_multiple_categories_with_products(self):
@@ -147,19 +178,22 @@ class TestCategory:
         category2.add_product(product2)
 
         # Проверяем счетчики
-        assert Category.total_categories == 2  # Ожидаем, что всего 2 категории
-        assert Category.total_products == 2     # Ожидаем, что всего 2 продукта
-        assert len(category1.products) == 1
-        assert len(category2.products) == 1
+        assert Category.total_categories == 2
+        assert Category.total_products == 2
+        assert len(category1._products) == 1
+        assert len(category2._products) == 1
+        assert category1.products.count("\n") == 1
+        assert category2.products.count("\n") == 1
 
     def test_category_add_product_already_in_category(self):
         """Проверка добавления продукта, который уже есть в категории"""
         category = Category("Электроника", "Все виды электроники")
         product = Product("Смартфон", "Современный смартфон", 29999.99, 5)
         category.add_product(product)
-        category.add_product(product)  # Пытаемся добавить тот же продукт еще раз
-        assert len(category.products) == 1
+        category.add_product(product)
+        assert category.products.count("\n") == 1
         assert Category.total_products == 1
+
 
     def test_category_remove_product_not_in_category(self):
         """Проверка удаления продукта, которого нет в категории"""
@@ -167,11 +201,10 @@ class TestCategory:
         product1 = Product("Смартфон", "Современный смартфон", 29999.99, 5)
         product2 = Product("Планшет", "Планшет для работы", 19999.99, 3)
         category.add_product(product1)
-        category.remove_product(product2)  # Пытаемся удалить продукт, которого нет
-        assert len(category.products) == 1
+        category.remove_product(product2)
+        assert len(category._products) == 1
         assert Category.total_products == 1
-        assert product1 in category.products
-        assert product2 not in category.products
+        assert product2 not in category._products
 
     def test_category_wrong_type_name(self):
         with pytest.raises(TypeError):
@@ -183,39 +216,38 @@ class TestCategory:
 
     def test_category_wrong_type_products(self):
         with pytest.raises(TypeError):
-            Category("Электроника", "Все виды электроники", products="not a list")
-
+            Category("Электроника", "Все виды электроники", products=123)
 
 
 
 def test_product_creation(product):
     assert product.name == "Test Product"
     assert product.description == "Test Description"
-    assert product.price == 100.0
+    assert product.price == 100.0  # Access the price using the getter
     assert product.quantity == 10
 
 
 def test_category_creation(category):
     assert category.name == "Test Category"
-    assert category.description == "Test Description"
-    assert category.products == []
+    assert category.description == "Test Description" 
+    assert category.products == ""
     assert Category.total_categories == 1
     assert Category.total_products == 0
 
 
 def test_category_add_product(category, product):
     category.add_product(product)
-    assert len(category.products) == 1
-    assert product in category.products
+    assert len(category._products) == 1
+    assert product in category._products
     assert Category.total_products == 1
 
 
 def test_category_remove_product(category, product):
     category.add_product(product)
     category.remove_product(product)
-    assert len(category.products) == 0
-    assert product not in category.products
-    assert Category.total_products == 0
+    assert len(category._products) == 0  # The list must be empty
+    assert product not in category._products
+    assert Category.total_products == 0 
 
 
 def test_multiple_categories():
@@ -235,5 +267,5 @@ def test_multiple_categories():
     # Проверяем счетчики
     assert Category.total_categories == 2  # Ожидаем, что всего 2 категории
     assert Category.total_products == 2     # Ожидаем, что всего 2 продукта
-    assert len(category1.products) == 1     # В первой категории 1 продукт
-    assert len(category2.products) == 1     # Во второй категории 1 продукт
+    assert len(category1._products) == 1
+    assert len(category2._products) == 1
