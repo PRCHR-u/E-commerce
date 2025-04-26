@@ -1,7 +1,47 @@
-from typing import List
+from abc import ABC, abstractmethod
+from typing import List, Union
 
 
-class Product:
+class ReprMixin:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __repr__(self):
+        attributes = self.__dict__
+        name = attributes.get("name")
+        description = attributes.get("description")
+        price = attributes.get("_price")
+        quantity = attributes.get("quantity")
+        return f"{self.__class__.__name__}(name={repr(name)}, description={repr(description)}, price={repr(price)}, quantity={repr(quantity)})"
+
+
+class BaseProduct(ABC):
+    """
+    Abstract base class for products.
+
+
+    """
+
+    @abstractmethod
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: Union[int, float],
+        quantity: int,
+    ) -> None:
+        """Инициализация продукта."""
+        self.name = name
+        self.description = description
+        self._price = price
+        self.quantity = quantity
+
+    @abstractmethod
+    def __add__(self, other):
+        pass
+
+
+class Product(ReprMixin, BaseProduct):
     def __init__(
         self,
         name: str,
@@ -18,9 +58,11 @@ class Product:
             raise TypeError("Quantity must be an integer")
         if quantity < 0:
             raise ValueError("Quantity cannot be negative")
-        self.name = name
-        self.description = description
-        self.quantity = quantity
+        ReprMixin.__init__(
+            self, name=name, description=description, price=price, quantity=quantity
+        )
+        BaseProduct.__init__(self, name, description, price, quantity)
+
         self.price = price
 
     def __add__(self, other):
@@ -35,15 +77,6 @@ class Product:
                 f"{other.__class__.__name__}"
             )
         return self.price * self.quantity + other.price * other.quantity
-
-    @classmethod
-    def new_product(cls, product_data):
-        """Создает новый объект Product из словаря."""
-        name = product_data["name"]
-        description = product_data["description"]
-        price = product_data["price"]
-        quantity = product_data["quantity"]
-        return cls(name, description, price, quantity)
 
     @property
     def price(self):
@@ -63,6 +96,7 @@ class Product:
 
 
 class Smartphone(Product):
+
     """Смартфон."""
 
     def __init__(
@@ -77,7 +111,7 @@ class Smartphone(Product):
         color: str,
     ) -> None:
         """Инициализация смартфона."""
-        super().__init__(name, description, price, quantity)
+        Product.__init__(self, name, description, price, quantity)
         self.efficiency = efficiency
         self.model = model
         self.memory = memory
@@ -98,15 +132,15 @@ class LawnGrass(Product):
         color: str,
     ) -> None:
         """Инициализация травы газонной."""
-        super().__init__(name, description, price, quantity)
+        Product.__init__(self, name, description, price, quantity)
         self.country = country
         self.germination_period = germination_period
         self.color = color
 
 
 class Category:
-    total_categories = 0
-    total_products = 0
+    category_count = 0
+    product_count = 0
 
     def __init__(
         self, name: str, description: str, products: List[Product] = None
@@ -121,26 +155,26 @@ class Category:
         self.name = name
         self.description = description
         self._products: List[Product] = []
+        Category.category_count += 1
         if products:
             for product in products:
                 self.add_product(product)
 
-        Category.total_categories += 1
-
     def add_product(self, product: Product) -> None:
         if not isinstance(product, Product):
-            raise TypeError(
-                "The object must be a Product or a subclass of Product."
-            )
+            raise TypeError("The object must be a Product or a subclass of Product.")
 
         if product not in self._products:
             self._products.append(product)
-            Category.total_products += 1
+            Category.product_count += 1
 
     def remove_product(self, product: Product) -> None:
         if product in self._products:
             self._products.remove(product)
-            Category.total_products -= 1
+            Category.product_count -= 1
+
+        else:
+            print("this product is not in category")
 
     @property
     def products(self) -> str:
