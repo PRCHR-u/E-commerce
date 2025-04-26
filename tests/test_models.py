@@ -116,30 +116,22 @@ class TestProduct:
             quantity=10
 
         )
-        product3 = Product(
-            name="Product 3",
+        product3 = Product(            
+            "Product 3",
             description="Test Description",
             price=100.0,
             quantity=0,
         )
-        product3 = Product(
-            quantity=0,
-        )
-        product3 = Product(
-            description="Test Description",
-            price=100.0,
-            quantity=0,
-        )
-
+       
         assert (
             product1 + product3 == 1000
             ), "Sum of product1 and product3 must be 1000"
         with pytest.raises(
-            TypeError,
-            match=(
-                "Unsupported operand type for \\+: "
-                "Product and <class 'int'>"
-            )
+                TypeError,
+                match=(
+                    "Unsupported operand type for \\+: Product and int"
+                )
+
 
         ):
             product1 + 10

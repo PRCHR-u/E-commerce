@@ -59,7 +59,7 @@ class Product:
             self._price = value
 
     def __str__(self):
-        return f"{self.name}, {self._price} руб. Остаток: {self.quantity} шт"
+        return f"{self.name}, {self._price} руб. Остаток: {self.quantity} шт."
 
 
 class Smartphone(Product):
@@ -106,7 +106,7 @@ class LawnGrass(Product):
 
 class Category:
     total_categories = 0
-    product_count = 0  # Переименованный атрибут вместо total_products
+    total_products = 0
 
     def __init__(
         self, name: str, description: str, products: List[Product] = None
@@ -135,12 +135,12 @@ class Category:
 
         if product not in self._products:
             self._products.append(product)
-            Category.product_count += 1  # Используем переименованный атрибут
+            Category.total_products += 1
 
     def remove_product(self, product: Product) -> None:
         if product in self._products:
             self._products.remove(product)
-            Category.product_count -= 1  # Используем переименованный атрибут
+            Category.total_products -= 1
 
     @property
     def products(self) -> str:
