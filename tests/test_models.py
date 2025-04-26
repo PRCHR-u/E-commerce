@@ -1,6 +1,5 @@
 import pytest
-from src.models import Product, Category
-from typing import List
+from src.models import Product, Category, Smartphone, LawnGrass
 
 
 @pytest.fixture(autouse=True)
@@ -17,14 +16,6 @@ def product():
         description="Test Description",
         price=100.0,
         quantity=10,
-    )
-
-
-@pytest.fixture
-def category():
-    return Category(
-        name="Test Category",
-        description="Test Description",
     )
 
 
@@ -47,7 +38,7 @@ class TestProduct:
 
     def test_product_zero_values(self):
         """Проверка корректной инициализации с нулевыми значениями"""
-        product = Product("Смартфон", "Современный смартфон", 10, 0)
+        product = Product("Смартфон", "Современный смартфон", 10.0, 0)
         assert product.quantity == 0
         product.price = 0.0
         assert product.price == 10.0
@@ -77,12 +68,12 @@ class TestProduct:
             Product("Смартфон", "Современный смартфон", 29999.99, "5")
 
     def test_new_product(self) -> None:
-        """Проверяет корректность работы метода new_product"""
+        """Проверяет корректность работы метода new_product."""
         product_data = {
             "name": "Телевизор",
             "description": "Современный телевизор",
             "price": 50000.0,
-            "quantity": 3
+            "quantity": 3,
         }
         product = Product.new_product(product_data)
         assert product.name == "Телевизор"
@@ -91,6 +82,7 @@ class TestProduct:
         assert product.quantity == 3
 
     def test_product_price_setter(self):
+        """Проверяет корректность работы сеттера для цены."""
         product = Product("Test Product", "Test Description", 100.0, 10)
         product.price = 200.0
         assert product.price == 200.0
@@ -98,18 +90,19 @@ class TestProduct:
         assert product.price == 200.0
 
     def test_product_price_setter_wrong_type(self):
+        """Проверяет корректность работы сеттера для цены with wrong type."""
         product = Product("Test Product", "Test Description", 100.0, 10)
         with pytest.raises(TypeError):
             product.price = "wrong type"
 
     def test_product_str(self):
-        """Проверка строкового представления объекта Product"""
+        """Проверка строкового представления объекта Product."""
         product = Product("Смартфон", "Современный смартфон", 29999.99, 5)
-        expected_str = "Смартфон, 29999.99 руб. Остаток: 5 шт"
+        expected_str = "Смартфон, 29999.99 руб. Остаток: 5 шт."
         assert str(product) == expected_str
 
     def test_product_add(self):
-        """Проверяет корректность работы метода __add__"""
+        """Проверяет корректность работы метода __add__."""
         product1 = Product("Смартфон", "Современный смартфон", 100, 10)
         product2 = Product("Чехол", "Защитный чехол", 200, 2)
         assert product1 + product2 == 1400
@@ -118,15 +111,10 @@ class TestProduct:
         """Проверяет корректность работы метода __add__ with wrong type"""
         product1 = Product(
             "Product 1",
-            "Test Description",
-            100.0,
-            10,
-        )
-        product2 = Product(
-            name="Product 2",
             description="Test Description",
-            price=200.0,
-            quantity=2,
+            price=100.0,
+            quantity=10
+
         )
         product3 = Product(
             name="Product 3",
@@ -134,12 +122,93 @@ class TestProduct:
             price=100.0,
             quantity=0,
         )
-        assert product1 + product3 == 1000, "Sum of product1 and product3 must be 1000"
-        with pytest.raises(TypeError, match="Unsupported operand type for \\+: Product and <class 'int'>") :
+        product3 = Product(
+            quantity=0,
+        )
+        product3 = Product(
+            description="Test Description",
+            price=100.0,
+            quantity=0,
+        )
+
+        assert (
+            product1 + product3 == 1000
+            ), "Sum of product1 and product3 must be 1000"
+        with pytest.raises(
+            TypeError,
+            match=(
+                "Unsupported operand type for \\+: "
+                "Product and <class 'int'>"
+            )
+
+        ):
             product1 + 10
 
+    def test_category_add_wrong_type(self, category):
+        """Проверяет корректность сложения разных типов"""
+
+    def test_product_add_different_types(self):
+        """
+        Test that adding a Smartphone to a LawnGrass raises a
+        TypeError.
+        """
+        smartphone = Smartphone(
+            "Smartphone", "Desc", 100.0, 1, "High", "Model", 128, "Black"
+        )
+        lawn_grass = LawnGrass(
+            "LawnGrass",
+            "Desc", 100.0, 1,
+            "USA",
+            14,
+            "Green"
+        )
+        smartphone2 = Smartphone(
+            "Smartphone2", "Desc", 100.0, 1, "High", "Model", 128, "Black"
+            )
+        assert smartphone + smartphone2 == 200.0, (
+            "Sum of smartphone and smartphone2 must be 200"
+        )
+        with pytest.raises(
+            TypeError,
+            match=("Unsupported operand type for \\+: " +
+                   "Smartphone and LawnGrass")
+        ):
+            smartphone + lawn_grass
+
+
+class TestSmartphone:
+    """Tests for Smartphone class"""
+
+    def test_smartphone_creation(self):
+        """Test correct Smartphone creation"""
+        smartphone = Smartphone(
+            name="Test Smartphone",
+            description="Test Smartphone Description",
+            price=500.0,
+            quantity=5,
+            efficiency="High",
+            model="Test Model",
+            memory=128,
+            color="Black",
+        )
+        assert smartphone.name == "Test Smartphone"
+        assert smartphone.description == "Test Smartphone Description"
+        assert smartphone.price == 500.0
+        assert smartphone.quantity == 5
+        assert smartphone.efficiency == "High"
+        assert smartphone.model == "Test Model"
+        assert smartphone.memory == 128
+        assert smartphone.color == "Black"
+
+
+class TestLawnGrass:
+    """Tests for LawnGrass class."""
+
+    pass
+
+
 class TestCategory:
-    """Тесты для класса Category"""
+    """Тесты для класса Category."""
 
     def test_category_initialization(self):
         """Проверка корректной инициализации объекта Category"""
@@ -154,10 +223,10 @@ class TestCategory:
         """Проверка инициализации категории с продуктами"""
         products = [
             Product("Смартфон", "Современный смартфон", 29999.99, 5),
-            # Добавляем продукт 1
-            Product("Планшет", "Планшет для работы", 19999.99, 3)
+
+            Product("Планшет", "Планшет для работы", 19999.99, 3),
         ]
-        category = Category("Электроника", "Все виды электроники", products )
+        category = Category("Электроника", "Все виды электроники", products)
 
         assert len(category._products) == 2
         assert Category.total_products == 2
@@ -177,12 +246,18 @@ class TestCategory:
 
     def test_product_counting(self):
         """Проверка подсчета количества продуктов"""
-        category = Category("Электроника", "Все виды электроники")
-
-        # Добавляем продукты
+        category = Category(
+            "Электроника",
+            "Все виды электроники",
+        )
+        # Adding products
         products = [
-            Product(f"Продукт {i}", f"Описание {i}", 1000.0 * i, i)
-            for i in range(3)
+            Product(
+                    f"Продукт {i}",
+                    f"Описание {i}",
+                    1000.0 * i,
+                    i
+                ) for i in range(3)
         ]
 
         for product in products:
@@ -202,11 +277,9 @@ class TestCategory:
         category1 = Category("Электроника", "Все виды электроники")
         category2 = Category("Аксессуары", "Аксессуары для техники")
 
-        # Создаем продукты
         product1 = Product("Смартфон", "Современный смартфон", 29999.99, 5)
         product2 = Product("Чехол", "Защитный чехол", 999.99, 10)
 
-        # Добавляем продукты в категории
         category1.add_product(product1)
         category2.add_product(product2)
 
@@ -217,6 +290,9 @@ class TestCategory:
         assert len(category2._products) == 1
         assert category1.products.count("\n") == 1
         assert category2.products.count("\n") == 1
+
+    def test_category_add_wrong_type(self, category):
+        """Проверка добавления в категорию объекта неправильного типа."""
 
     def test_category_add_product_already_in_category(self):
         """Проверка добавления продукта, который уже есть в категории"""
@@ -239,15 +315,11 @@ class TestCategory:
         assert product2 not in category._products
 
     def test_category_str(self):
-        """Проверка строкового представления объекта Category"""
-        category = Category("Электроника", "Все виды электроники")
-        expected_str = "Электроника, количество продуктов: 0 шт."
-        assert str(category) == expected_str
+        """Проверка строкового представления объекта Category."""
 
         category = Category("Электроника", "Все виды электроники")
         expected_str = "Электроника, количество продуктов: 0 шт."
         assert str(category) == expected_str
-
 
     def test_category_wrong_type_name(self):
         with pytest.raises(TypeError):
@@ -262,6 +334,13 @@ class TestCategory:
             Category("Электроника", "Все виды электроники", products=123)
 
 
+@pytest.fixture
+def category():
+    return Category(
+        name="Test Category",
+        description="Test Description",
+    )
+
 
 def test_product_creation(product):
     assert product.name == "Test Product"
@@ -272,7 +351,7 @@ def test_product_creation(product):
 
 def test_category_creation(category):
     assert category.name == "Test Category"
-    assert category.description == "Test Description" 
+    assert category.description == "Test Description"
     assert category.products == ""
     assert Category.total_categories == 1
     assert Category.total_products == 0
@@ -288,9 +367,9 @@ def test_category_add_product(category, product):
 def test_category_remove_product(category, product):
     category.add_product(product)
     category.remove_product(product)
-    assert len(category._products) == 0  # The list must be empty
+    assert len(category._products) == 0
     assert product not in category._products
-    assert Category.total_products == 0 
+    assert Category.total_products == 0
 
 
 def test_multiple_categories():
@@ -309,7 +388,6 @@ def test_multiple_categories():
 
     # Проверяем счетчики
     assert Category.total_categories == 2  # Ожидаем, что всего 2 категории
-    assert Category.total_products == 2     # Ожидаем, что всего 2 продукта
+    assert Category.total_products == 2  # Ожидаем, что всего 2 продукта
     assert len(category1._products) == 1
     assert len(category2._products) == 1
-
