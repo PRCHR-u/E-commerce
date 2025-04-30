@@ -12,7 +12,11 @@ class ReprMixin:
         description = attributes.get("description")
         price = attributes.get("_price")
         quantity = attributes.get("quantity")
-        return f"{self.__class__.__name__}(name={repr(name)}, description={repr(description)}, price={repr(price)}, quantity={repr(quantity)})"
+        return (
+            f"{self.__class__.__name__}(name={repr(name)}, "
+            f"description={repr(description)}, "
+            f"price={repr(price)}, quantity={repr(quantity)})"
+        )
 
 
 class BaseProduct(ABC):
@@ -59,7 +63,11 @@ class Product(ReprMixin, BaseProduct):
         if quantity < 0:
             raise ValueError("Quantity cannot be negative")
         ReprMixin.__init__(
-            self, name=name, description=description, price=price, quantity=quantity
+            self,
+            name=name,
+            description=description,
+            price=price,
+            quantity=quantity
         )
         BaseProduct.__init__(self, name, description, price, quantity)
 
@@ -162,7 +170,9 @@ class Category:
 
     def add_product(self, product: Product) -> None:
         if not isinstance(product, Product):
-            raise TypeError("The object must be a Product or a subclass of Product.")
+            raise TypeError(
+                "The object must be a Product or a subclass of Product."
+                )
 
         if product not in self._products:
             self._products.append(product)

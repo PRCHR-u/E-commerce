@@ -1,6 +1,4 @@
-import io
 import pytest
-from contextlib import redirect_stdout
 from src.models import Product, Category, Smartphone, LawnGrass
 
 
@@ -39,8 +37,9 @@ class TestProduct:
         assert test_product.price == 100.0
         assert test_product.quantity == 10
         assert repr(test_product) == (
-            "Product(name='Test Product', description='Test Description', price=100.0, quantity=10)"
-        ), f"Expected representation does not match: {repr(test_product)}"
+            "Product(name='Test Product', description='Test Description', "
+            "price=100.0, quantity=10)"
+        )
 
     def test_product_initialization(
         self,
@@ -138,14 +137,15 @@ class TestProduct:
             quantity=0,
         )
 
-        assert product1 + product3 == 1000, "Sum of product1 and product3 must be 1000"
+        assert product1 + product3 == 1000, (
+            "Sum of product1 and product3 must be 1000"
+        )
         with pytest.raises(
-            TypeError, match=("Unsupported operand type for \\+: Product and int")
+            TypeError, match=(
+                "Unsupported operand type for \\+: Product and int"
+                )
         ):
             product1 + 10
-
-    def test_category_add_wrong_type(self, category):
-        """Проверяет корректность сложения разных типов"""
 
     def test_product_add_different_types(self):
         """
@@ -153,17 +153,26 @@ class TestProduct:
         TypeError.
         """
         smartphone = Smartphone(
-            "Smartphone", "Desc", 100.0, 1, "High", "Model", 128, "Black"
+            "Smartphone", "Desc", 100.0, 1,
+            "High", "Model", 128, "Black"
         )
-        lawn_grass = LawnGrass("LawnGrass", "Desc", 100.0, 1, "USA", 14, "Green")
+        lawn_grass = LawnGrass(
+            "LawnGrass", "Desc", 100.0, 1,
+            "USA", 14, "Green"
+        )
         smartphone2 = Smartphone(
-            "Smartphone2", "Desc", 100.0, 1, "High", "Model", 128, "Black"
+            "Smartphone2", "Desc", 100.0, 1,
+            "High", "Model", 128, "Black"
         )
-        assert smartphone + smartphone2 == 200.0, "Sum of smartphone and smartphone2"
-        " must be 200"
+        assert smartphone + smartphone2 == 200.0, (
+            "Sum of smartphone and smartphone2 must be 200"
+        )
         with pytest.raises(
             TypeError,
-            match=("Unsupported operand type for \\+: " + "Smartphone and LawnGrass"),
+            match=(
+                "Unsupported operand type for \\+: "
+                "Smartphone and LawnGrass"
+            ),
         ):
             smartphone + lawn_grass
 
@@ -227,18 +236,21 @@ class TestCategory:
     def test_category_counting(self, reset_counters):
         """Проверка подсчета количества категорий"""
         # Создаем несколько категорий
-        categories = [Category(f"Категория {i}", f"Описание {i}") for i in range(3)]
+        categories = [
+            Category(f"Категория {i}", f"Описание {i}")
+            for i in range(3)
+        ]
 
         assert Category.category_count == 3
         assert len(categories) == 3
 
     def test_product_counting(self, reset_counters):
         """Проверка подсчета количества продуктов"""
-        category = Category("Электроника", "Все виды электроники",
-        )
+        category = Category("Электроника", "Все виды электроники")
         # Adding products
         products = [
-            Product(f"Продукт {i}", f"Описание {i}", 1000.0, i) for i in range(3)
+            Product(f"Продукт {i}", f"Описание {i}", 1000.0, i)
+            for i in range(3)
         ]
 
         for product in products:
@@ -286,7 +298,8 @@ class TestCategory:
         """Проверка удаления продукта, которого нет в категории"""
         category = Category("Электроника", "Все виды электроники")
         product1 = Product("Смартфон", "Современный смартфон", 29999.99, 5)
-        product2 = Product("Планшет", "Планшет для работы", 19999.99, 3)category.add_product(product1)
+        product2 = Product("Планшет", "Планшет для работы", 19999.99, 3)
+        category.add_product(product1)
         category.remove_product(product2)
         assert len(category._products) == 1
         assert Category.product_count == 1
@@ -370,23 +383,14 @@ def test_multiple_categories(reset_counters):
     )  # Ожидаем, что всего 2 продукта
     assert len(category1._products) == 1
     assert len(category2._products) == 1
-    assert len(category2._products) == 1
 
 
 def test_repr_mixin_product():
-    """
-    Test that ReprMixin correctly prints information about the
-    created object.
-    """
+    """Test that ReprMixin correctly prints
+    information about created object."""
     test_product = Product("Test Product", "Test Description", 100.0, 10)
     repr_output = repr(test_product)
-
-    expected_output = (
-        "Product(name='Test Product', description='Test Description', price=100.0, "
-        "quantity=10)"
-    )
-
-    assert (
-        repr_output
-        == "Product(name='Test Product', description='Test Description', price=100.0, quantity=10)"
+    assert repr_output == (
+        "Product(name='Test Product', description='Test Description', "
+        "price=100.0, quantity=10)"
     )
