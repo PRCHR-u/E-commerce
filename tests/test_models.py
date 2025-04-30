@@ -55,15 +55,20 @@ class TestProduct:
 
     def test_product_negative_quantity(self):
         """Проверка валидации отрицательного количества"""
-        with pytest.raises(ValueError, match="Quantity cannot be negative"):
+        with pytest.raises(ValueError, match="Количество не может быть отрицательным"):
             Product("Смартфон", "Современный смартфон", 29999.99, -5)
 
-    def test_product_zero_values(self):
-        """Проверка корректной инициализации с нулевыми значениями"""
-        product = Product("Смартфон", "Современный смартфон", 10.0, 0)
-        assert product.quantity == 0
+    def test_product_zero_quantity(self):
+        """Проверка создания товара с нулевым количеством"""
+        with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
+            Product("Смартфон", "Современный смартфон", 29999.99, 0)
+
+    def test_product_zero_price(self):
+        """Проверка установки нулевой цены"""
+        product = Product("Смартфон", "Современный смартфон", 100.0, 1)
         product.price = 0.0
-        assert product.price == 10.0
+        # Проверяем, что цена не изменилась, так как нулевая цена недопустима
+        assert product.price == 100.0
 
     def test_product_different_values(self):
         """Проверка инициализации объекта Product с разными значениями"""
@@ -126,19 +131,11 @@ class TestProduct:
         product3 = Product(
             "Product 3",
             "Test Description",
-            100.0,
-            0,
-        )
-        product3 = Product(
-            "Product 3",
-            "Test Description",
-
             price=100.0,
-            quantity=0,
+            quantity=1,
         )
-
-        assert product1 + product3 == 1000, (
-            "Sum of product1 and product3 must be 1000"
+        assert product1 + product3 == 1100, (
+            "Sum of product1 and product3 must be 1100"
         )
         with pytest.raises(
             TypeError, match=(
@@ -249,7 +246,7 @@ class TestCategory:
         category = Category("Электроника", "Все виды электроники")
         # Adding products
         products = [
-            Product(f"Продукт {i}", f"Описание {i}", 1000.0, i)
+            Product(f"Продукт {i}", f"Описание {i}", 1000.0, i + 1)
             for i in range(3)
         ]
 
@@ -324,6 +321,45 @@ class TestCategory:
     def test_category_wrong_type_products(self):
         with pytest.raises(TypeError):
             Category("Электроника", "Все виды электроники", products=123)
+
+    def test_middle_price_with_products(self, reset_counters):
+        """Проверка подсчета средней цены при наличии товаров."""
+        products = [
+            Product("Товар 1", "Описание 1", 100.0, 1),
+            Product("Товар 2", "Описание 2", 200.0, 1),
+            Product("Товар 3", "Описание 3", 300.0, 1)
+        ]
+        category = Category("Тест", "Тестовая категория", products)
+        assert category.middle_price() == 200.0  # (100 + 200 + 300) / 3
+
+    def test_middle_price_empty_category(self, reset_counters):
+        """Проверка подсчета средней цены для пустой категории."""
+        category = Category("Пустая", "Пустая категория")
+        
+        # Для пустой категории должен возвращаться 0
+        assert category.middle_price() == 0.0
+
+    def test_middle_price_one_product(self, reset_counters):
+        """Проверка подсчета средней цены при наличии одного товара."""
+        product = Product("Товар", "Описание", 150.0, 1)
+        category = Category("Тест", "Тестовая категория", [product])
+        
+        # Средняя цена должна быть равна цене единственного товара
+        assert category.middle_price() == 150.0
+
+    def test_middle_price_after_removing_products(self, reset_counters):
+        """Проверка подсчета средней цены после удаления всех товаров."""
+        product = Product("Товар", "Описание", 150.0, 1)
+        category = Category("Тест", "Тестовая категория", [product])
+        
+        # Сначала проверяем, что средняя цена считается корректно
+        assert category.middle_price() == 150.0
+        
+        # Удаляем товар
+        category.remove_product(product)
+        
+        # После удаления всех товаров должен возвращаться 0
+        assert category.middle_price() == 0.0
 
 
 @pytest.fixture

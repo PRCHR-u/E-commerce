@@ -61,7 +61,9 @@ class Product(ReprMixin, BaseProduct):
         if not isinstance(quantity, int):
             raise TypeError("Quantity must be an integer")
         if quantity < 0:
-            raise ValueError("Quantity cannot be negative")
+            raise ValueError("Количество не может быть отрицательным")
+        if quantity == 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
         ReprMixin.__init__(
             self,
             name=name,
@@ -195,3 +197,11 @@ class Category:
 
     def __str__(self) -> str:
         return f"{self.name}, количество продуктов: {len(self._products)} шт."
+
+    def middle_price(self) -> float:
+        """Вычисляет среднюю цену товаров в категории."""
+        try:
+            total_price = sum(product.price for product in self._products)
+            return total_price / len(self._products)
+        except ZeroDivisionError:  # Обработка случая, когда в категории нет товаров
+            return 0.0
